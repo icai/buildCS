@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+
+	<style>	
+	/* code */
+	 
+	p code {
+	  background: #efefef;
+	  border: 1px solid #eaeaea;
+	  font-family: monaco, monospace;
+	  font-size: .75em;
+	  padding: 2px 8px;
+	  -webkit-border-radius: 3px;
+	}
+	 
+	pre {
+	  color: #353535;
+	  font-size: 14px;
+	  line-height: 1.4;
+	  margin: 20px 0;
+	  padding: 20px;
+	  background: white;
+	  border: 1px solid #e7e7e7;
+	  border-bottom: 1px solid #ddd;
+	  -webkit-box-shadow: 0 1px 3px 0 #eee;
+	  -webkit-border-radius: 3px;
+	}
+	 
+	pre code {
+	  font-family: monaco, monospace;
+	  font-size: .8em;
+	}
+	 
+	code .comment { color: #888 }
+	code .init { color: #2F6FAD }
+	code .string { color: #5890AD }
+	code .keyword { color: #8A6343 }
+	code .number { color: #2F6FAD }
+
+
+	</style>
+</head>
+<body>
+
+<h1>build Collection Structure</h1>
+
+<pre class="js" >
+	<code>
+var data = {
+ user: [{id:1,name:'a', avatar_id:1,school_id:1},{id:2,name:'b',avatar_id:2,school_id:2}],
+ avatar:[{id:1,url:'A'},{ id:2, url:'B'}],
+ school:[{id:1,image:'ab'},{id:2,image:'cd'}] 
+};
+
+
+var usermap = {
+	collection:'user',
+	children: ['avatar','school']
+};
+
+var Timer = function (){
+    this.startTime = + new Date;
+};
+
+Timer.prototype.stop = function(){
+    return + new Date - this.startTime;
+};
+
+
+var timer;
+
+var buildCS = function(data,layout){
+
+	timer = new Timer();// test speed start
+
+	var _data = {},
+		collection = data[layout['collection']],
+		children = layout['children'];
+
+	for (var i = 0; i < children.length; i++) {
+		_data[children[i]] = (function(d){
+			var _d = {};
+			for(var j = 0; j < d.length; j++){
+				_d['_'+ d[j]['id']] = d[j];
+			}
+			return _d;
+		})(data[children[i]]);
+	};
+	for (var i = 0; i < collection.length; i++) {
+		for (var j = 0; j < children.length; j++) {
+			var tmpObj = _data[children[j]]['_'+ collection[i][children[j]+ '_id']];
+			if(tmpObj){
+				collection[i][children[j]] = tmpObj
+			}
+		}
+	};
+	return collection;
+}
+
+console.info( buildCS(data,usermap) );
+console.info( timer.stop()); // test speed stop
+	</code>
+</pre>
+
+<script>
+	/**
+	 * Highlight the given `js`.
+	 */
+	 
+	function highlight(js) {
+	  return js
+	    .replace(/</g, '&lt;')
+	    .replace(/>/g, '&gt;')
+	    .replace(/\/\/(.*)/gm, '<span class="comment">//$1</span>')
+	    .replace(/('.*?')/gm, '<span class="string">$1</span>')
+	    .replace(/(\d+\.\d+)/gm, '<span class="number">$1</span>')
+	    .replace(/(\d+)/gm, '<span class="number">$1</span>')
+	    .replace(/\bnew *(\w+)/gm, '<span class="keyword">new</span> <span class="init">$1</span>')
+	    .replace(/\b(function|new|throw|return|var|if|else)\b/gm, '<span class="keyword">$1</span>')
+	}
+
+
+
+
+  var codes = document.querySelectorAll('pre.js code');
+
+  [].forEach.call(codes,function(v,i){
+  	v.innerHTML = highlight(v.innerHTML);
+  })
+
+</script>
+<script src="test.js"></script>
+	
+</body>
+</html>
